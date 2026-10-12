@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-label="Un teléfono mostrando tres planes: Promo, Anual y Mensual">
+  <rect width="360" height="240" rx="20" fill="#F6F3EE"/>
+  <circle cx="52" cy="40" r="26" fill="#EAE5DB"/><circle cx="318" cy="206" r="34" fill="#EAE5DB"/>
+  <!-- teléfono -->
+  <rect x="122" y="22" width="116" height="196" rx="20" fill="#14161F"/>
+  <rect x="130" y="34" width="100" height="172" rx="12" fill="#fff"/>
+  <rect x="158" y="26" width="44" height="5" rx="2.5" fill="#2A2D3D"/>
+  <!-- tarjetas de planes -->
+  <rect x="138" y="46" width="84" height="40" rx="9" fill="#FFF1CF" stroke="#FFB81F" stroke-width="1.5"/>
+  <text x="147" y="62" font-family="DM Sans, Arial, sans-serif" font-size="8" font-weight="600" fill="#7A5600">Promo 3 meses</text>
+  <text x="147" y="79" font-family="DM Sans, Arial, sans-serif" font-size="14" font-weight="800" fill="#14161F">$9.900</text>
+  <rect x="138" y="94" width="84" height="40" rx="9" fill="#F6F3EE" stroke="#D9341A" stroke-width="2"/>
+  <text x="147" y="110" font-family="DM Sans, Arial, sans-serif" font-size="9" font-weight="600" fill="#D9341A">Plan Anual</text>
+  <text x="147" y="127" font-family="DM Sans, Arial, sans-serif" font-size="14" font-weight="800" fill="#14161F">$19.900</text>
+  <path d="M213 98l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7z" fill="#FFB81F"/>
+  <rect x="138" y="142" width="84" height="40" rx="9" fill="#F6F3EE" stroke="#E4E0D8" stroke-width="1.5"/>
+  <text x="147" y="158" font-family="DM Sans, Arial, sans-serif" font-size="9" font-weight="600" fill="#5E6068">Plan Mensual</text>
+  <text x="147" y="175" font-family="DM Sans, Arial, sans-serif" font-size="14" font-weight="800" fill="#14161F">$29.900</text>
+  <rect x="146" y="190" width="68" height="10" rx="5" fill="#D9341A"/>
+  <!-- globo: promo poco clara -->
+  <rect x="22" y="78" width="84" height="46" rx="12" fill="#fff" stroke="#14161F" stroke-width="2"/>
+  <path d="M96 124l12 12 2-16z" fill="#fff" stroke="#14161F" stroke-width="2" stroke-linejoin="round"/>
+  <text x="64" y="98" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#14161F">¿Y después</text>
+  <text x="64" y="112" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#D9341A">de 3 meses?</text>
+  <!-- insignia plan anual -->
+  <rect x="248" y="96" width="98" height="40" rx="12" fill="#1F7A5C"/>
+  <text x="297" y="113" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="9" font-weight="600" fill="#DDF0E8">Mejor valor</text>
+  <text x="297" y="128" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="11" font-weight="800" fill="#fff">Anual −33%</text>
+  <path d="M244 116h-6" stroke="#1F7A5C" stroke-width="3" stroke-linecap="round"/>
+</svg>

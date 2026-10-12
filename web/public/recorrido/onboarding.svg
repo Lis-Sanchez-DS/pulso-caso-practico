@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-label="Un teléfono con una lista de pasos iniciales y una persona preguntando por dónde empezar">
+  <rect width="360" height="240" rx="20" fill="#F6F3EE"/>
+  <circle cx="318" cy="38" r="26" fill="#EAE5DB"/><circle cx="40" cy="208" r="32" fill="#EAE5DB"/>
+  <rect x="122" y="22" width="116" height="196" rx="20" fill="#14161F"/>
+  <rect x="130" y="34" width="100" height="172" rx="12" fill="#fff"/>
+  <rect x="158" y="26" width="44" height="5" rx="2.5" fill="#2A2D3D"/>
+  <text x="140" y="56" font-family="DM Sans, Arial, sans-serif" font-size="8.5" font-weight="800" fill="#14161F">Configura tu plan</text>
+  <rect x="140" y="64" width="80" height="7" rx="3.5" fill="#E4E0D8"/>
+  <rect x="140" y="64" width="26" height="7" rx="3.5" fill="#D9341A"/>
+  <!-- pasos -->
+  <rect x="138" y="82" width="84" height="30" rx="8" fill="#E3F1EB"/>
+  <circle cx="153" cy="97" r="7" fill="#1F7A5C"/><path d="M149.5 97l2.6 2.6 4.4-4.9" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="165" y="100" font-family="DM Sans, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#14161F">Crear cuenta</text>
+  <rect x="138" y="118" width="84" height="30" rx="8" fill="#F6F3EE" stroke="#E4E0D8"/>
+  <circle cx="153" cy="133" r="7" fill="none" stroke="#A8A59E" stroke-width="2"/>
+  <text x="165" y="136" font-family="DM Sans, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#14161F">Test inicial</text>
+  <rect x="138" y="154" width="84" height="30" rx="8" fill="#F6F3EE" stroke="#E4E0D8"/>
+  <circle cx="153" cy="169" r="7" fill="none" stroke="#A8A59E" stroke-width="2"/>
+  <text x="165" y="172" font-family="DM Sans, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#14161F">Elegir rutina</text>
+  <rect x="146" y="190" width="68" height="10" rx="5" fill="#E4E0D8"/>
+  <!-- persona perdida -->
+  <circle cx="58" cy="136" r="17" fill="#FFB81F"/><rect x="38" y="156" width="40" height="42" rx="16" fill="#D9341A"/>
+  <circle cx="52" cy="133" r="2" fill="#14161F"/><circle cx="64" cy="133" r="2" fill="#14161F"/><path d="M52 143q6-4 12 0" stroke="#14161F" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <rect x="26" y="62" width="92" height="44" rx="12" fill="#fff" stroke="#14161F" stroke-width="2"/>
+  <path d="M52 106l-6 12 18-8z" fill="#fff" stroke="#14161F" stroke-width="2" stroke-linejoin="round"/>
+  <text x="72" y="82" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#14161F">¿Por dónde</text>
+  <text x="72" y="96" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#D9341A">empiezo?</text>
+  <!-- test demasiado largo -->
+  <rect x="252" y="112" width="86" height="54" rx="12" fill="#fff" stroke="#E4E0D8" stroke-width="1.5"/>
+  <text x="295" y="130" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="9" font-weight="700" fill="#14161F">Test inicial</text>
+  <rect x="264" y="138" width="62" height="5" rx="2.5" fill="#E4E0D8"/><rect x="264" y="148" width="62" height="5" rx="2.5" fill="#E4E0D8"/>
+  <text x="295" y="161" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="8" font-weight="700" fill="#D9341A">¡Muy largo!</text>
+</svg>

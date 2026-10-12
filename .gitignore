@@ -1,0 +1,10 @@
+# Python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Prototipo local anterior (no forma parte de la entrega)
+app.py
+
+# Sistema
+.DS_Store
