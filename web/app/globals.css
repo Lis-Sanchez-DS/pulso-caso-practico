@@ -210,3 +210,26 @@ select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid
   .cambio { grid-template-columns: 1fr; gap: 4px; }
   .cambio-flecha { transform: rotate(90deg); }
 }
+
+/* Plan de acción: prioridades y metas */
+.metodo { margin: 22px 0 8px; padding: 22px 26px; background: var(--superficie); border: 1px solid var(--linea); border-left: 5px solid var(--sol); border-radius: 16px; box-shadow: var(--sombra); }
+.metodo h2 { margin: 0 0 10px; font-size: 1.2rem; }
+.metodo ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.grupo { margin: 36px 0 0; font-size: 1.5rem; }
+.prioridad { margin: 0 0 2px; color: var(--rojo); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.prioridad.comp { color: var(--suave); }
+.motivo { margin: 10px 0 0; padding: 8px 12px; background: var(--fondo); border-radius: 10px; font-size: 0.92rem; }
+.accion.suplementaria { border-style: dashed; box-shadow: none; }
+.accion.suplementaria .numero { background: var(--noche); }
+.meta-tabla { border: 1px solid var(--linea); border-radius: 12px; overflow: hidden; }
+.meta-fila { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--linea); align-items: center; }
+.meta-fila:last-child { border-bottom: 0; }
+.meta-cabecera { background: var(--fondo); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--suave); }
+.meta-fila span:not(.meta-nombre) { font-variant-numeric: tabular-nums; font-weight: 600; }
+.meta-final { color: var(--selva); font-weight: 800; }
+@media (max-width: 760px) {
+  .meta-cabecera { display: none; }
+  .meta-fila { grid-template-columns: 1fr 1fr 1fr; }
+  .meta-fila .meta-nombre { grid-column: 1 / -1; font-weight: 700; }
+  .meta-fila span[data-etiqueta]::before { content: attr(data-etiqueta); display: block; font-size: 0.68rem; color: var(--suave); font-weight: 600; text-transform: uppercase; }
+}

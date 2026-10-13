@@ -13,9 +13,17 @@ export type Accion = {
   impacto?: { valor: string; texto: string }; // estimación económica
   comentarios: Comentario[]; // comentarios de clientes que la respaldan
   nota?: string;
+  prioridad?: number; // 1 = la más prioritaria; vacío en las complementarias
+  complementaria?: boolean;
+  motivo: string; // por qué tiene esta prioridad
+  meta: Meta; // meta numérica basada en datos reales
 };
 
+export type FilaMeta = { metrica: string; hoy: string; intermedia?: string; final: string };
+export type Meta = { filas: FilaMeta[]; origen: string };
+
 export type PlanDeAccion = {
+  metodo: { titulo: string; pasos: string[] };
   norte: { valor: string; texto: string; detalle: string };
   acciones: Accion[];
   llm: { propuesta: string; datos: Dato[]; comentarios: Comentario[] };
@@ -77,7 +85,105 @@ export function construirPlan(clientes: Cliente[], comentarios: Comentario[]): P
   const contradictorios = comentarios.filter((c) => (c.calificacion ?? 0) >= 4 && c.sentimiento === "Negativo").length;
   const noRelacionados = comentarios.filter((c) => c.sentimiento === "No aplica").length;
 
-  const acciones: Accion[] = [
+  // ---------- Metas basadas en referencias internas ----------
+  // Meta final = lo que ya se logra hoy en el mejor segmento o antes de la actualización de julio.
+  // Meta intermedia = cerrar la mitad de la brecha (supuesto prudente).
+  const p0 = (x: number) => `${Math.round(x * 100)}%`;
+  const medio = (a: number, b: number) => (a + b) / 2;
+
+  // Plan anual: si los clientes de la promo adoptaran el anual como los demás canales
+  const noPromo = clientes.filter((c) => c.canal_adquisicion !== "Promo 3 meses");
+  const anualHoy = anual.length / total;
+  const refAnual = noPromo.filter((c) => c.plan === "Anual").length / noPromo.length;
+  const anualFinal = (anual.length + refAnual * promo.length) / total;
+  const quejasPrecio = cuenta("Precio y promoción", "Negativo");
+  const quejasPromo = validos.filter(
+    (c) => c.subcategoria === "Precio y promoción" && c.sentimiento === "Negativo" && /promo|3 meses|engañ/i.test(c.comentario)
+  ).length;
+
+  // Técnico: relación de cancelaciones Android / iOS antes y después de la actualización de julio
+  const ACTUALIZACION = "2026-07-01";
+  const canc = (so: string, post: boolean) =>
+    cancelados.filter(
+      (c) => c.dispositivo === so && c.fecha_cancelacion !== null && (c.fecha_cancelacion >= ACTUALIZACION) === post
+    ).length;
+  const razonPre = canc("Android", false) / Math.max(1, canc("iOS", false));
+  const razonPost = canc("Android", true) / Math.max(1, canc("iOS", true));
+  const fmtRazon = (x: number) => `${x.toFixed(1).replace(".", ",")}×`;
+  const tecnicos = validos.filter((c) => c.subcategoria === "Estabilidad técnica" && c.sentimiento === "Negativo");
+  const mesesPost = new Set(tecnicos.filter((c) => c.fecha >= ACTUALIZACION).map((c) => c.fecha.slice(0, 7)));
+  const tecPost = tecnicos.filter((c) => c.fecha >= ACTUALIZACION).length / Math.max(1, mesesPost.size);
+  const tecPre = tecnicos.filter((c) => c.fecha < ACTUALIZACION).length / 7; // diciembre a junio
+  const fmtMes = (x: number) => `${x.toFixed(1).replace(".", ",")} al mes`;
+  const act30Android = act30.filter((c) => c.dispositivo === "Android");
+  const act30Ios = act30.filter((c) => c.dispositivo === "iOS");
+  const muchas30 = (xs: Cliente[]) => xs.filter((c) => (c.sesiones_ultimos_30d ?? 0) > 10).length / Math.max(1, xs.length);
+
+  // Onboarding: finalización según el mejor canal y efecto en las sesiones del primer mes
+  const canales = [...new Set(clientes.map((c) => c.canal_adquisicion))];
+  const finalizacion = (xs: Cliente[]) => xs.filter((c) => c.completo_onboarding === "Sí").length / Math.max(1, xs.length);
+  const mejorCanal = canales
+    .map((k) => ({ k, v: finalizacion(clientes.filter((c) => c.canal_adquisicion === k)) }))
+    .sort((a, b) => b.v - a.v)[0];
+  const onbHoy = conOnb.length / total;
+  const sesionesConOnb = conOnb.filter((c) => c.sesiones_primer_mes > 10).length / Math.max(1, conOnb.length);
+  const muchasHoy = muchasPrimer.length / Math.max(1, conDato.length);
+  const muchasFinal = mejorCanal.v * sesionesConOnb;
+  const cancelEsperada = mejorCanal.v * tasa(conOnb) + (1 - mejorCanal.v) * tasa(sinOnb);
+
+  // Constancia: lo que ya logran los clientes activos de iOS
+  const constHoy = act30Muchas.length / Math.max(1, act30.length);
+  const constFinal = muchas30(act30Ios);
+
+  // Alertas: de quienes pasan el umbral sin sesión, cuántos terminan cancelando
+  const cancelTrasUmbral = inact.filter((v) => v >= UMBRAL_INACTIVIDAD).length;
+  const trasUmbral = cancelTrasUmbral + silenciosos.length;
+
+  const metas: Record<string, Meta> = {
+    anual: {
+      filas: [
+        { metrica: "Clientes en el plan anual", hoy: p0(anualHoy), intermedia: p0(medio(anualHoy, anualFinal)), final: p0(anualFinal) },
+        { metrica: "Quejas sobre precio o promoción", hoy: `${quejasPrecio}`, intermedia: `${Math.round(medio(quejasPrecio, quejasPrecio - quejasPromo))}`, final: `${quejasPrecio - quejasPromo}` },
+      ],
+      origen: `Hoy el ${p0(refAnual)} de los clientes que no llegan por la promo elige el plan anual, y ninguno de los ${promo.length} de la promo lo hace. La meta final supone que los clientes de la promo se comportan como los demás canales. De las ${quejasPrecio} quejas de precio, ${quejasPromo} hablan directamente de la promoción y deberían desaparecer al retirarla.`,
+    },
+    tecnico: {
+      filas: [
+        { metrica: "Cancelaciones Android frente a iOS", hoy: fmtRazon(razonPost), intermedia: fmtRazon(medio(razonPost, razonPre)), final: fmtRazon(razonPre) },
+        { metrica: "Comentarios sobre fallas técnicas", hoy: fmtMes(tecPost), intermedia: fmtMes(medio(tecPost, tecPre)), final: fmtMes(tecPre) },
+      ],
+      origen: `La referencia es el periodo anterior a la actualización de julio: entonces Android tenía ${fmtRazon(razonPre)} las cancelaciones de iOS (hoy ${fmtRazon(razonPost)}) y casi no había comentarios de fallas. Además, solo el ${p0(muchas30(act30Android))} de los clientes activos en Android supera las 10 sesiones al mes, frente al ${p0(muchas30(act30Ios))} en iOS.`,
+    },
+    onboarding: {
+      filas: [
+        { metrica: "Clientes que completan el onboarding", hoy: p0(onbHoy), intermedia: p0(medio(onbHoy, mejorCanal.v)), final: p0(mejorCanal.v) },
+        { metrica: "Clientes con más de 10 sesiones en el primer mes", hoy: p0(muchasHoy), intermedia: p0(medio(muchasHoy, muchasFinal)), final: p0(muchasFinal) },
+      ],
+      origen: `El canal con mejor finalización hoy es ${mejorCanal.k} (${p0(mejorCanal.v)}). Entre quienes completan el onboarding, el ${p0(sesionesConOnb)} supera las 10 sesiones del primer mes; entre quienes no lo completan, ${p0(sinOnb.filter((c) => c.sesiones_primer_mes > 10).length / Math.max(1, sinOnb.length))}. Con esa finalización, la cancelación esperada bajaría de ${p0(cancelados.length / total)} a ${p0(cancelEsperada)}, suponiendo que la relación se mantenga.`,
+    },
+    constancia: {
+      filas: [
+        { metrica: "Clientes activos con más de 10 sesiones en 30 días", hoy: p0(constHoy), intermedia: p0(medio(constHoy, constFinal)), final: p0(constFinal) },
+      ],
+      origen: `La referencia es lo que ya logran los clientes activos de iOS (${p0(constFinal)}). Esta meta depende de resolver antes los problemas técnicos en Android: con la app fallando, un incentivo por constancia no puede funcionar.`,
+    },
+    alertas: {
+      filas: [
+        { metrica: `Clientes que cancelan tras ${UMBRAL_INACTIVIDAD} días sin sesión`, hoy: `${pct(cancelTrasUmbral, trasUmbral)} (${cancelTrasUmbral} de ${trasUmbral})`, final: "A definir con un piloto" },
+      ],
+      origen: `No hay una referencia interna: hoy nadie recibe una alerta. La meta se fijaría con un piloto: alertar a una mitad de los clientes que lleguen a ${UMBRAL_INACTIVIDAD} días sin sesión, comparar cuántos cancelan en los siguientes 30 días contra la otra mitad y ajustar. Con ${trasUmbral} clientes en esta situación, la muestra es muy pequeña para prometer un número.`,
+    },
+  };
+
+  const motivos: Record<string, string> = {
+    anual: "La mayor cantidad de quejas constantes se da por el precio y la confusión. Lograr tener una mayor cantidad de clientes en el plan anual termina dando una ganancia medible.",
+    tecnico: "La última falla técnica fuerte llevó a una cantidad significativa de usuarios a cancelar y salirse, por lo que prevenir y prepararse para una situación similar es crucial.",
+    onboarding: "La mayoría de los comentarios negativos restantes se basan en la confusión y la experiencia de usuario. Esta termina siendo crucial al considerar que una porción de los clientes vienen de referidos, siendo estos los clientes que demuestran mayor fidelidad.",
+    constancia: "Complementaria: depende de resolver antes los problemas técnicos, porque en Android casi nadie supera las 10 sesiones al mes.",
+    alertas: "Complementaria: ayuda a rescatar clientes en riesgo, pero hoy alcanzaría a pocos y su efecto aún es incierto.",
+  };
+
+  const base: Omit<Accion, "meta" | "motivo" | "prioridad" | "complementaria">[] = [
     {
       clave: "anual",
       titulo: "Promover el plan anual en lugar de la promo de 3 meses",
@@ -172,7 +278,23 @@ export function construirPlan(clientes: Cliente[], comentarios: Comentario[]): P
     },
   ];
 
+  // Orden de prioridad definido por la consultora; las dos últimas son complementarias
+  const orden = ["anual", "tecnico", "onboarding", "constancia", "alertas"];
+  const acciones: Accion[] = orden.map((clave, i) => {
+    const a = base.find((x) => x.clave === clave)!;
+    return { ...a, meta: metas[clave], motivo: motivos[clave], prioridad: i < 3 ? i + 1 : undefined, complementaria: i >= 3 };
+  });
+
   return {
+    metodo: {
+      titulo: "¿Cómo se fija una meta basada en la realidad?",
+      pasos: [
+        "Punto de partida: se mide hoy la métrica con los datos que ya existen.",
+        "Referencia interna: se busca lo que ya se logra en el mejor segmento (un canal, un sistema operativo) o en el periodo anterior al problema.",
+        "Meta intermedia: cerrar la mitad de la brecha hacia esa referencia, un supuesto prudente para el primer periodo. Meta final: igualar la referencia.",
+        "Validación: probar con un grupo piloto y recalibrar. Como la muestra es de 300 clientes, todas las metas son orientativas.",
+      ],
+    },
     norte: {
       valor: pct(cancelados.length, total),
       texto: "de los clientes de la muestra canceló",
