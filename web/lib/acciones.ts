@@ -119,17 +119,14 @@ export function construirPlan(clientes: Cliente[], comentarios: Comentario[]): P
   const act30Ios = act30.filter((c) => c.dispositivo === "iOS");
   const muchas30 = (xs: Cliente[]) => xs.filter((c) => (c.sesiones_ultimos_30d ?? 0) > 10).length / Math.max(1, xs.length);
 
-  // Onboarding: finalización según el mejor canal y efecto en las sesiones del primer mes
-  const canales = [...new Set(clientes.map((c) => c.canal_adquisicion))];
-  const finalizacion = (xs: Cliente[]) => xs.filter((c) => c.completo_onboarding === "Sí").length / Math.max(1, xs.length);
-  const mejorCanal = canales
-    .map((k) => ({ k, v: finalizacion(clientes.filter((c) => c.canal_adquisicion === k)) }))
-    .sort((a, b) => b.v - a.v)[0];
-  const onbHoy = conOnb.length / total;
+  // Onboarding: al ser obligatorio se asume que el 100% de los clientes nuevos lo completa.
+  // La referencia es lo que ya logran hoy quienes lo completan.
   const sesionesConOnb = conOnb.filter((c) => c.sesiones_primer_mes > 10).length / Math.max(1, conOnb.length);
+  const sesionesSinOnb = sinOnb.filter((c) => c.sesiones_primer_mes > 10).length / Math.max(1, sinOnb.length);
   const muchasHoy = muchasPrimer.length / Math.max(1, conDato.length);
-  const muchasFinal = mejorCanal.v * sesionesConOnb;
-  const cancelEsperada = mejorCanal.v * tasa(conOnb) + (1 - mejorCanal.v) * tasa(sinOnb);
+  const muchasFinal = sesionesConOnb;
+  const cancelHoy = cancelados.length / total;
+  const cancelFinal = tasa(conOnb);
 
   // Constancia: lo que ya logran los clientes activos de iOS
   const constHoy = act30Muchas.length / Math.max(1, act30.length);
@@ -156,10 +153,10 @@ export function construirPlan(clientes: Cliente[], comentarios: Comentario[]): P
     },
     onboarding: {
       filas: [
-        { metrica: "Clientes que completan el onboarding", hoy: p0(onbHoy), intermedia: p0(medio(onbHoy, mejorCanal.v)), final: p0(mejorCanal.v) },
         { metrica: "Clientes con más de 10 sesiones en el primer mes", hoy: p0(muchasHoy), intermedia: p0(medio(muchasHoy, muchasFinal)), final: p0(muchasFinal) },
+        { metrica: "Clientes que cancelan", hoy: p0(cancelHoy), intermedia: p0(medio(cancelHoy, cancelFinal)), final: p0(cancelFinal) },
       ],
-      origen: `El canal con mejor finalización hoy es ${mejorCanal.k} (${p0(mejorCanal.v)}). Entre quienes completan el onboarding, el ${p0(sesionesConOnb)} supera las 10 sesiones del primer mes; entre quienes no lo completan, ${p0(sinOnb.filter((c) => c.sesiones_primer_mes > 10).length / Math.max(1, sinOnb.length))}. Con esa finalización, la cancelación esperada bajaría de ${p0(cancelados.length / total)} a ${p0(cancelEsperada)}, suponiendo que la relación se mantenga.`,
+      origen: `Al ser obligatorio, se asume que el 100% de los clientes nuevos completa el onboarding, así que ya no se mide cuántos lo completan. La referencia es lo que logran hoy quienes sí lo completan: el ${p0(sesionesConOnb)} supera las 10 sesiones del primer mes y el ${p0(cancelFinal)} cancela; entre quienes no lo completan, ${p0(sesionesSinOnb)} supera las 10 sesiones y el ${p0(tasa(sinOnb))} cancela. Es una asociación observada: la meta supone que se mantenga cuando todos pasen por el onboarding.`,
     },
     constancia: {
       filas: [
